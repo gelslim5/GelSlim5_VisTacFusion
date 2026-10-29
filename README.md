@@ -24,15 +24,19 @@ visual  [B,3,224,224] ──► MAE-L/16 (frozen) ──► asymmetric bottlenec
 
 ## Results (real validation set, 12 objects, same checkpoint in all three input modes)
 
+Numbers produced by `bash scripts/eval.sh` with the released checkpoints:
+
 | Input            | Depth MSE (mm²) | Normal MSE | Rotation L₁ | Angular error (°) | Translation L₁ |
 |------------------|----------------:|-----------:|------------:|------------------:|---------------:|
-| vision + tactile | **0.0066**      | **0.0074** | **0.0129**  | **0.652**         | **0.0053**     |
-| tactile only     | 0.0170          | 0.0122     | 0.0425      | 2.036             | 0.0122         |
-| vision only      | 0.1124          | 0.0369     | 0.0134      | 0.676             | 0.0056         |
+| vision + tactile | **0.0066**      | **0.0074** | **0.0138**  | **0.69**          | **0.0054**     |
+| tactile only     | 0.0170          | 0.0128     | 0.0502      | 2.40              | 0.0140         |
+| vision only      | 0.1055          | 0.0388     | 0.0148      | 0.74              | 0.0060         |
 
-Translation is normalised by half the 82 mm object size (0.0053 ≈ 0.22 mm). Depth / normal use
+Translation is normalised by half the 82 mm object size (0.0054 ≈ 0.22 mm). Depth / normal use
 `best_depth.pt`, rotation / translation use `best_pose.pt` (checkpoint selection in
-`vistacfusion/engine/train.py`). Baseline numbers are in Table II of the paper.
+`vistacfusion/engine/train.py`). The paper (Table II) reports 0.652° / 0.0053 for the pose of
+the same training recipe; the released `best_pose.pt` comes from a re-run of that recipe
+(0.69° / 0.0054). Baseline numbers are in Table II of the paper.
 
 ## Installation
 
