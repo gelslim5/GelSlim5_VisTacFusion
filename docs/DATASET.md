@@ -92,7 +92,7 @@ bash scripts/download_dataset.sh sim      # sim + meshes
 ```
 
 The Hugging Face repo stores one tarball per object (`real/<object>.tar`, `sim/<object>.tar`),
-and `meshes/meshes.tar`; the script unpacks them into `./dataset`.
+`meshes/meshes.tar` and the checkpoints; the script unpacks them into `./dataset`.
 
 ## License
 
