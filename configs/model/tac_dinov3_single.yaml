@@ -1,0 +1,54 @@
+# Single-encoder baseline: dinov3 tactile only, no fusion trunk (frozen encoder -> DPT + PoseHead).
+# Derived from tac_dinov3_rgb_mae.yaml (same taps / tokens / heads), rgb_encoder removed.
+model_type: single_encoder
+image_size: 224
+trunk_dim: 768
+encoder:
+  name: dinov3_vitl16
+  checkpoint: weights/dinov3_vitl16.pth
+  embed_dim: 1024
+  patch_size: 16
+  frozen: true
+  keep_cls: true
+projection:
+  out_dim: 768
+  modality_embedding: true
+  rgb_positional_embedding: false
+  tactile_positional_embedding: true
+tokens:
+  num_spatial_queries: 196
+  num_pose_queries: 1
+  object_embedding: true
+  num_objects: 20
+fusion_trunk:
+  num_layers: 4
+  num_bottleneck_tokens: 16
+  num_heads: 8
+  ffn_mult: 4
+  dropout: 0.1
+  bottleneck_continuity: carry
+  tap_layers:
+  - 0
+  - 1
+  - 2
+  - 3
+  fusion_variant: asymmetric
+heads:
+  dpt:
+    features: 256
+    dropout: 0.1
+    out_depth_channels: 1
+    out_normal_channels: 3
+    output_frame: tactile
+    encoder_tap_layers:
+    - 5
+    - 11
+    - 17
+    - 23
+    inject_gate_init: 0.0
+  pose:
+    hidden_dim: 256
+    dropout: 0.1
+    pose_mode: regression
+    rot_num_bins: 72
+    use_spatial_pool: true

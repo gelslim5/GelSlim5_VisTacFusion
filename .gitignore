@@ -1,0 +1,23 @@
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# data, weights and run outputs are downloaded / produced locally
+dataset/
+dataset_release/
+weights/
+checkpoints/
+third_party/
+outputs/
+eval_results/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.npy
+*.tar
+*.tar.gz
+.DS_Store

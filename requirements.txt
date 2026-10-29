@@ -1,0 +1,23 @@
+# Core
+torch>=2.2
+torchvision>=0.17
+numpy>=1.24
+pyyaml>=6.0
+tqdm>=4.66
+
+# Encoders (DINOv3 / CLIP / SigLIP load through HuggingFace transformers)
+transformers>=4.56
+safetensors>=0.4
+
+# Data / geometry
+pillow>=10.0
+opencv-python>=4.9
+scipy>=1.11
+trimesh>=4.0
+
+# Logging / plots
+tensorboard>=2.16
+matplotlib>=3.8
+
+# Tests
+pytest>=8.0

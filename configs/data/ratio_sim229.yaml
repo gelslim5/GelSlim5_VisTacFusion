@@ -1,0 +1,59 @@
+# Ratio ladder, transfilt + sim rgb_zoom 1.15 + fixed_crop 0.816: sim229
+dataset: sim+real
+image_size: 224
+fixed_crop: 0.816
+loader:
+  num_workers: 8
+  persistent_workers: true
+  pin_memory: true
+  prefetch_factor: 4
+norm:
+  imagenet_mean:
+  - 123.675
+  - 116.28
+  - 103.53
+  imagenet_std:
+  - 58.395
+  - 57.12
+  - 57.375
+real:
+  augment: false
+  mesh_dir: dataset/meshes
+  oversample: 1
+  rgb_subdir: rgb
+  root: dataset/real
+  use_rendered_normals: false
+  val_every: 10
+sim:
+  align_real_rotation: true
+  gel_view_m: 0.017502
+  include_objects:
+  - pattern_01_2_lines_angle_1_2
+  - pattern_01_2_lines_angle_2
+  - pattern_01_2_lines_angle_3
+  - pattern_04_3_lines_angle_1
+  - pattern_04_3_lines_angle_2
+  - pattern_06_5_lines_angle_1
+  - pattern_31_rod
+  - pattern_32
+  - pattern_33
+  - pattern_35
+  - pattern_36
+  - pattern_37
+  mesh_dir: dataset/meshes
+  rgb_subdir: rgb
+  rgb_zoom: 1.15
+  root: dataset/sim
+  rot_augment: true
+  rot_augment_max_deg: 15.0
+  rotation_windows: configs/data/real_rotation_windows.json
+  tactile_subdir: samples_g
+  translation_bounds: configs/data/real_translation_bounds.json
+  translation_margin: 1.5
+  use_gt_depth: true
+  use_rendered_normals: true
+  val_every: 20
+  train_samples_per_session: 556
+synthetic:
+  num_objects: 8
+  num_samples: 256

@@ -1,0 +1,61 @@
+# Ablation: Tactile=SITR-B18 (18 calibration imgs), RGB=CLIP ViT-L/14 (256 patches, has CLS)
+
+image_size: 224
+trunk_dim: 768
+encoder:
+  name: sitr_b18
+  checkpoint: weights/SITR_B18.pth
+  calibration_dir: dataset/sim/pattern_01_2_lines_angle_1_2/session_000/sensor_0000/calibration
+  num_calibration: 18
+  embed_dim: 768
+  patch_size: 16
+  frozen: true
+  share_encoder_weights: false
+  keep_cls: true
+rgb_encoder:
+  name: clip_vitl14
+  model_id: openai/clip-vit-large-patch14
+  embed_dim: 1024
+  patch_size: 14
+projection:
+  out_dim: 768
+  modality_embedding: true
+  rgb_positional_embedding: false
+  tactile_positional_embedding: true
+tokens:
+  num_spatial_queries: 196
+  num_pose_queries: 1
+  object_embedding: true
+  num_objects: 20
+fusion_trunk:
+  num_layers: 4
+  num_bottleneck_tokens: 16
+  num_heads: 8
+  ffn_mult: 4
+  dropout: 0.1
+  bottleneck_continuity: carry
+  tap_layers:
+  - 0
+  - 1
+  - 2
+  - 3
+  fusion_variant: asymmetric
+heads:
+  dpt:
+    features: 256
+    dropout: 0.1
+    out_depth_channels: 1
+    out_normal_channels: 3
+    output_frame: tactile
+    encoder_tap_layers:
+    - 2
+    - 5
+    - 8
+    - 11
+    inject_gate_init: 0.0
+  pose:
+    hidden_dim: 256
+    dropout: 0.1
+    pose_mode: regression
+    rot_num_bins: 72
+    use_spatial_pool: true

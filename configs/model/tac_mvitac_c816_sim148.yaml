@@ -1,0 +1,54 @@
+# MViTac baseline: frozen MoCo-pretrained ResNet-18 (tactile + vision) → PoseHead
+# No DPT (global vectors only, no spatial tokens)
+
+model_type: mvitac
+
+image_size: 224
+trunk_dim: 768
+
+mvitac:
+  tactile_ckpt: outputs/mvitac_pretrain_c816_sim148/tactile_encoder.pt
+  vision_ckpt: outputs/mvitac_pretrain_c816_sim148/vision_encoder.pt
+
+encoder:
+  name: null
+  embed_dim: 512
+  patch_size: 16
+
+projection:
+  out_dim: 768
+  modality_embedding: true
+  rgb_positional_embedding: false
+  tactile_positional_embedding: true
+
+tokens:
+  num_spatial_queries: 196
+  num_pose_queries: 1
+  object_embedding: true
+  num_objects: 20
+
+fusion_trunk:
+  num_layers: 4
+  num_bottleneck_tokens: 16
+  num_heads: 8
+  ffn_mult: 4
+  dropout: 0.1
+  bottleneck_continuity: carry
+  tap_layers: [0, 1, 2, 3]
+  fusion_variant: asymmetric
+
+heads:
+  dpt:
+    features: 256
+    dropout: 0.1
+    out_depth_channels: 1
+    out_normal_channels: 3
+    output_frame: tactile
+    encoder_tap_layers: [2, 5, 8, 11]
+    inject_gate_init: 0.0
+  pose:
+    hidden_dim: 256
+    dropout: 0.1
+    pose_mode: regression
+    rot_num_bins: 72
+    use_spatial_pool: true

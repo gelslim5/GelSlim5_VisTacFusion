@@ -1,0 +1,56 @@
+# REAL-ONLY baseline for the ratio ladder (no sim train), 100 epochs, filtered real val 472
+
+image_size: 224
+fixed_crop: 0.816            # 1/(cos15+sin15): border-free for +-15 deg gel spin (default 0.7071)
+
+dataset: sim+real
+
+synthetic:
+  num_samples: 256
+  num_objects: 8
+
+sim:
+  include_objects:
+    - pattern_01_2_lines_angle_1_2
+    - pattern_01_2_lines_angle_2
+    - pattern_01_2_lines_angle_3
+    - pattern_04_3_lines_angle_1
+    - pattern_04_3_lines_angle_2
+    - pattern_06_5_lines_angle_1
+    - pattern_31_rod
+    - pattern_32
+    - pattern_33
+    - pattern_35
+    - pattern_36
+    - pattern_37
+  root: dataset/sim
+  mesh_dir: dataset/meshes
+  rgb_subdir: rgb
+  use_gt_depth: true
+  use_rendered_normals: true
+  gel_view_m: 0.017502
+  rot_augment: true
+  rot_augment_max_deg: 15.0
+  val_every: 20
+  align_real_rotation: true
+  rotation_windows: configs/data/real_rotation_windows.json
+  train_samples_per_session: 0
+
+real:
+  root: dataset/real
+  mesh_dir: dataset/meshes
+  rgb_subdir: rgb
+  use_rendered_normals: false
+  val_every: 10
+  augment: false
+  oversample: 1
+
+loader:
+  num_workers: 8
+  pin_memory: true
+  prefetch_factor: 4
+  persistent_workers: true
+
+norm:
+  imagenet_mean: [123.675, 116.28, 103.53]
+  imagenet_std:  [58.395, 57.12, 57.375]

@@ -1,0 +1,60 @@
+# modality-dropout ablation: p_both sweep point between default 0.55 and none 1.0
+# Same as train.yaml but batch_size=32 for single-GPU with tight VRAM
+
+seed: 0
+device: cuda
+amp: true
+
+optim:
+  name: adamw
+  lr: 2.0e-4
+  weight_decay: 0.05
+  betas: [0.9, 0.999]
+
+schedule:
+  name: cosine
+  warmup_steps: 1000
+  max_epochs: 150
+
+batch_size: 32
+num_workers: 8
+
+modality_dropout:
+  enabled: true
+  p_both: 0.8
+  p_tactile_only: 0.15
+  p_rgb_only: 0.05
+  p_dpt_inject: 0.5
+
+loss:
+  depth:
+    type: mse
+    grad_matching_weight: 0.0
+    weight: 1.0
+  normal:
+    type: mse
+    weight: 1.0
+  pose:
+    rot_weight: 1.0
+    trans_weight: 1.0
+    weight: 1.0
+  uncertainty_weighting: true
+  grouped_uncertainty: true
+  dense_pose_ratio: 1.0
+
+augmentation:
+  tactile:
+    gain: true
+    bias: true
+    gradient: true
+    residual_noise: true
+    geometric: true
+  rgb:
+    photometric: true
+    geometric: false
+
+eval:
+  metrics: [depth_absrel, depth_rmse, normal_mean_angle, pose_rot_deg, pose_trans_mm]
+  report_per_config: true
+log_every: 50
+ckpt_every_epochs: 5

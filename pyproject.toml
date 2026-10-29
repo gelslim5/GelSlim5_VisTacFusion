@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vistacfusion"
+version = "1.0.0"
+description = "VisTacFusion: visuo-tactile depth, surface-normal and planar-pose estimation for the GelSlim 5.0 sensor."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+dynamic = ["dependencies"]
+
+[tool.setuptools.packages.find]
+include = ["vistacfusion*"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
