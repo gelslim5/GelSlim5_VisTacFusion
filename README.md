@@ -1,6 +1,6 @@
 # GelSlim 5.0 — VisTacFusion
 
-Code, dataset and checkpoints for **GelSlim 5.0: Unifying Vision and Touch with a Single
+Code and dataset for **GelSlim 5.0: Unifying Vision and Touch with a Single
 Fingertip Camera** ([arXiv 2610.31334](https://arxiv.org/abs/2610.31334),
 [project page](https://gelslim5.github.io/geslim5_website/)).
 
@@ -13,7 +13,7 @@ from the same viewpoint. **VisTacFusion** fuses the pair and predicts, in the ta
 - the planar **SE(2) object pose** `(cos θ, sin θ, t_x, t_y)` (asymmetric bottleneck fusion
   trunk → pose MLP).
 
-One checkpoint runs with paired input, tactile only, or vision only (modality dropout).
+One trained model runs with paired input, tactile only, or vision only (modality dropout).
 
 ```
 tactile [B,3,224,224] ──► SITR-B/16 (frozen) ──► multiscale taps ──► gated RGB injection ──► DPT ──► depth, normal
@@ -22,21 +22,18 @@ tactile [B,3,224,224] ──► SITR-B/16 (frozen) ──► multiscale taps ─
 visual  [B,3,224,224] ──► MAE-L/16 (frozen) ──► asymmetric bottleneck fusion trunk ──► pose MLP ──► (cos θ, sin θ, t_x, t_y)
 ```
 
-## Results (real validation set, 12 objects, same checkpoint in all three input modes)
-
-Numbers produced by `bash scripts/eval.sh` with the released checkpoints:
+## Results (real validation set, 12 objects, same model in all three input modes)
 
 | Input            | Depth MSE (mm²) | Normal MSE | Rotation L₁ | Angular error (°) | Translation L₁ |
 |------------------|----------------:|-----------:|------------:|------------------:|---------------:|
-| vision + tactile | **0.0066**      | **0.0074** | **0.0138**  | **0.69**          | **0.0054**     |
-| tactile only     | 0.0170          | 0.0128     | 0.0502      | 2.40              | 0.0140         |
-| vision only      | 0.1055          | 0.0388     | 0.0148      | 0.74              | 0.0060         |
+| vision + tactile | **0.0066**      | **0.0074** | **0.0129**  | **0.652**         | **0.0053**     |
+| tactile only     | 0.0170          | 0.0122     | 0.0425      | 2.036             | 0.0122         |
+| vision only      | 0.1124          | 0.0369     | 0.0134      | 0.676             | 0.0056         |
 
-Translation is normalised by half the 82 mm object size (0.0054 ≈ 0.22 mm). Depth / normal use
-`best_depth.pt`, rotation / translation use `best_pose.pt` (checkpoint selection in
-`vistacfusion/engine/train.py`). The paper (Table II) reports 0.652° / 0.0053 for the pose of
-the same training recipe; the released `best_pose.pt` comes from a re-run of that recipe
-(0.69° / 0.0054). Baseline numbers are in Table II of the paper.
+Translation is normalised by half the 82 mm object size (0.0053 ≈ 0.22 mm). Depth / normal are
+read from the `best_depth.pt` of a run, rotation / translation from its `best_pose.pt`
+(checkpoint selection in `vistacfusion/engine/train.py`). `bash scripts/train.sh` with the
+default configs reproduces this setting (Table II of the paper, where the baselines are listed).
 
 ## Installation
 
@@ -47,14 +44,14 @@ pip install -e .            # Python ≥ 3.10, PyTorch ≥ 2.2
 pytest                      # CPU smoke tests with mock encoders, no weights needed
 ```
 
-## Dataset and checkpoints
+## Dataset
 
-Everything is hosted on Hugging Face (dataset repo `gelslim5/gelslim5-vistacfusion`, see
+The dataset is hosted on Hugging Face (dataset repo `gelslim5/gelslim5-vistacfusion`, see
 [docs/DATASET.md](docs/DATASET.md) for the layout and label conventions):
 
 ```bash
 pip install huggingface_hub
-bash scripts/download_dataset.sh         # real + sim + meshes + checkpoints (~21 GB)
+bash scripts/download_dataset.sh         # real + sim + meshes (~20 GB)
 bash scripts/download_dataset.sh real    # real data + meshes only (~1.3 GB)
 ```
 
@@ -63,11 +60,11 @@ bash scripts/download_dataset.sh real    # real data + meshes only (~1.3 GB)
 | `real/` | 12 objects × 1 session, 4 669 paired tactile / visual frames with mesh-rendered depth GT and robot pose GT | 1.3 GB |
 | `sim/` | the same 12 objects × 12 sessions (30° rotation steps), 50 400 paired frames: Blender render, generated tactile appearance, visual render, depth / normal GT, pose | 18 GB |
 | `meshes/` | the 12 object meshes (`.obj`, mm) | 3 MB |
-| `checkpoints/vistacfusion_sitr_mae/` | `best_depth.pt`, `best_pose.pt` of the paper model (trainable weights only, 370 MB each) | 0.7 GB |
 
-The released checkpoints contain only the trainable parameters (projections, fusion trunk,
-injection, heads, object embedding). The frozen encoders are loaded from their original
-checkpoints, which you download yourself (licences differ per model):
+## Encoder weights
+
+The encoders are frozen and loaded from their original checkpoints, which you download
+yourself (licences differ per model):
 
 | Encoder | Config key | File expected at | Source |
 |---|---|---|---|
@@ -85,21 +82,22 @@ baselines (`configs/model/tac_*_rgb_*.yaml`). The SITR encoder is calibrated on 
 calibration images of `dataset/sim/pattern_01_2_lines_angle_1_2/session_000/sensor_0000/calibration/`,
 which ship with the dataset.
 
-## Evaluate the released model
+## Evaluate a trained model
 
 ```bash
-bash scripts/eval.sh                       # real validation split, all three input modes
+bash scripts/eval.sh --train-dir outputs/<run>          # real validation split, all three input modes
 # -> eval_results/eval_metrics.txt and one visualisation per object in eval_results/val_vis/
 
 # one sensor directory of the dataset (GT depth overlaid when present)
-bash scripts/eval.sh --session-dir dataset/real/pattern_32/session_000/sensor_0000 --max-samples 20
+bash scripts/eval.sh --train-dir outputs/<run> --session-dir dataset/real/pattern_32/session_000/sensor_0000 --max-samples 20
 
 # your own image pair
-bash scripts/eval.sh --tactile my_tactile.png --rgb my_rgb.png
+bash scripts/eval.sh --train-dir outputs/<run> --tactile my_tactile.png --rgb my_rgb.png
 ```
 
-Inputs are 224×224 frames of the 17.5 mm tactile field of view; the model works in the fixed
-0.816 centre crop that `preprocess_image` applies.
+`--train-dir` is a training output folder (it holds `config.json`, `best_depth.pt`,
+`best_pose.pt`). Inputs are 224×224 frames of the 17.5 mm tactile field of view; the model
+works in the fixed 0.816 centre crop that `preprocess_image` applies.
 
 ## Train
 
@@ -152,5 +150,5 @@ docs/DATASET.md         dataset layout, units and label conventions
 
 ## License
 
-Code: MIT (see `LICENSE`). Dataset and checkpoints: CC BY 4.0. Third-party encoder weights
+Code: MIT (see `LICENSE`). Dataset: CC BY 4.0. Third-party encoder weights
 keep their own licences.

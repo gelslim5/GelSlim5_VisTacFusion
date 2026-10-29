@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Maintainer script: upload dataset_release/ (per-object tarballs + checkpoints) to the
+# Maintainer script: upload dataset_release/ (per-object tarballs) to the
 # Hugging Face dataset repo.  Needs `hf auth login` with an account that owns $REPO.
 #
 #   REPO=gelslim5/gelslim5-vistacfusion bash scripts/upload_to_hf.sh
